@@ -1132,11 +1132,15 @@ async function runLoginSequence() {
 
             // Phase 6: Flash and reveal
             flashEl.classList.add('active');
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 600));
 
             loginScreen.style.display = 'none';
+            const appEl = document.getElementById('app');
+            appEl.style.display = '';
+            appEl.classList.add('fullscreen-grid');
+
+            await new Promise(r => setTimeout(r, 100));
             flashEl.classList.remove('active');
-            document.getElementById('app').style.display = '';
 
             resolve();
         });
@@ -1155,8 +1159,10 @@ function initGrid() {
     const canvasWrap = document.getElementById('canvas-wrap');
     let resizeTimer = null;
     function onResize() {
-        const w = canvasWrap.clientWidth - 16;  // subtract padding
-        const h = canvasWrap.clientHeight - 16;
+        const isFullscreen = document.getElementById('app').classList.contains('fullscreen-grid');
+        const pad = isFullscreen ? 0 : 16;
+        const w = canvasWrap.clientWidth - pad;
+        const h = canvasWrap.clientHeight - pad;
         if (w > 0 && h > 0) renderer.resize(w, h);
     }
     window.addEventListener('resize', () => {
@@ -1257,7 +1263,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (existingToken) {
         // Skip login, go straight to grid
         document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app').style.display = '';
+        const appEl = document.getElementById('app');
+        appEl.style.display = '';
+        appEl.classList.add('fullscreen-grid');
         initGrid();
         return;
     }
