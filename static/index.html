@@ -10,7 +10,18 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='2' width='12' height='12' fill='none' stroke='%2300DFFC' stroke-width='2'/><line x1='8' y1='2' x2='8' y2='14' stroke='%2300DFFC' stroke-width='1'/><line x1='2' y1='8' x2='14' y2='8' stroke='%2300DFFC' stroke-width='1'/></svg>">
 </head>
 <body>
-    <div id="app">
+    <!-- Login Gate -->
+    <div id="login-screen">
+        <div id="login-center">
+            <div id="login-prompt"></div>
+            <input type="password" id="login-input" autocomplete="off" spellcheck="false">
+            <div id="login-error"></div>
+            <div id="boot-sequence"></div>
+        </div>
+        <div id="login-flash"></div>
+    </div>
+
+    <div id="app" style="display:none">
         <!-- Header -->
         <header id="header">
             <h1>THE GRID</h1>

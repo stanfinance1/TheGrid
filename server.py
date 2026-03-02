@@ -32,7 +32,7 @@ VIZ_AUTH_TOKEN = os.environ.get("VIZ_AUTH_TOKEN", "")
 async def _auth_middleware(request: Request, call_next):
     """Require Bearer token for /api/* endpoints (except health)."""
     path = request.url.path
-    if path.startswith("/api/") and path != "/api/health" and VIZ_AUTH_TOKEN:
+    if path.startswith("/api/") and path not in ("/api/health", "/api/auth") and VIZ_AUTH_TOKEN:
         auth = request.headers.get("Authorization", "")
         # Also allow ?token= query param for browser convenience
         query_token = request.query_params.get("token", "")
@@ -126,6 +126,20 @@ async def health():
     Used by the dashboard to determine server connectivity
     without being affected by Supabase latency or outages."""
     return {"status": "ok"}
+
+
+@app.post("/api/auth")
+async def auth(request: Request):
+    """Validate access token for the login screen."""
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse(status_code=400, content={"error": "invalid body"})
+    token = body.get("token", "")
+    # If no VIZ_AUTH_TOKEN is configured, accept any input
+    if not VIZ_AUTH_TOKEN or token == VIZ_AUTH_TOKEN:
+        return {"ok": True}
+    return JSONResponse(status_code=401, content={"error": "access denied"})
 
 
 @app.get("/")

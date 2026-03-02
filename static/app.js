@@ -851,11 +851,17 @@ let healthErrors = 0;
 /**
  * Fetch with an AbortController timeout so slow responses
  * don't hang indefinitely and count as failures.
+ * Includes Bearer token from sessionStorage if available.
  */
 function fetchWithTimeout(url, timeoutMs) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
-    return fetch(url, { signal: controller.signal })
+    const opts = { signal: controller.signal };
+    const token = sessionStorage.getItem('grid_token');
+    if (token) {
+        opts.headers = { 'Authorization': `Bearer ${token}` };
+    }
+    return fetch(url, opts)
         .finally(() => clearTimeout(timer));
 }
 
@@ -965,7 +971,183 @@ function gameLoop() {
 //  INIT
 // ═══════════════════════════════════════════════════════
 
-window.addEventListener('DOMContentLoaded', () => {
+// ═══════════════════════════════════════════════════════
+//  LOGIN SCREEN & BOOT SEQUENCE
+// ═══════════════════════════════════════════════════════
+
+const BOOT_LINES = [
+    { text: 'INITIALIZING NEURAL LINK...', delay: 200 },
+    { text: 'SUPABASE CONNECTION <span class="status-label">............</span> <span class="status-ok">ESTABLISHED</span>', delay: 300 },
+    { text: 'LOADING AGENT REGISTRY <span class="status-label">.........</span> <span class="status-ok">7 FOUND</span>', delay: 250 },
+    { text: '> FOREMAN <span class="status-label">....................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: '> LEDGER <span class="status-label">.....................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: '> SCOUT <span class="status-label">......................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: '> SCRIBE <span class="status-label">.....................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: '> ADVISOR <span class="status-label">....................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: '> WATCHTOWER <span class="status-label">.................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: '> OVERSEER <span class="status-label">...................</span> <span class="status-ok">ONLINE</span>', agent: true, delay: 120 },
+    { text: 'ALL SYSTEMS NOMINAL.', delay: 400 },
+    { text: 'ENTERING THE GRID...', final: true, delay: 600 },
+];
+
+function typeText(element, text, speed) {
+    return new Promise(resolve => {
+        let i = 0;
+        element.style.width = 'auto';
+        element.style.visibility = 'hidden';
+        element.textContent = text;
+        const fullWidth = element.scrollWidth;
+        element.textContent = '';
+        element.style.visibility = 'visible';
+        element.style.width = '0';
+
+        function tick() {
+            if (i <= text.length) {
+                element.textContent = text.substring(0, i);
+                element.style.width = Math.min((i / text.length) * fullWidth, fullWidth) + 'px';
+                i++;
+                setTimeout(tick, speed);
+            } else {
+                element.style.width = fullWidth + 'px';
+                resolve();
+            }
+        }
+        tick();
+    });
+}
+
+function playBootSequence(container) {
+    return new Promise(resolve => {
+        let i = 0;
+        function nextLine() {
+            if (i >= BOOT_LINES.length) {
+                setTimeout(resolve, 400);
+                return;
+            }
+            const line = BOOT_LINES[i];
+            const div = document.createElement('div');
+            div.className = 'boot-line' + (line.agent ? ' agent-line' : '') + (line.final ? ' final-line' : '');
+            div.innerHTML = line.text;
+            container.appendChild(div);
+
+            // Trigger reflow then add visible class for transition
+            void div.offsetHeight;
+            div.classList.add('visible');
+
+            i++;
+            setTimeout(nextLine, line.delay);
+        }
+        nextLine();
+    });
+}
+
+async function attemptLogin(inputEl, errorEl) {
+    const token = inputEl.value;
+    if (!token) return;
+
+    inputEl.disabled = true;
+
+    try {
+        const res = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+        });
+
+        if (!res.ok) {
+            // Access denied
+            errorEl.textContent = 'ACCESS DENIED';
+            errorEl.className = 'visible';
+            errorEl.classList.remove('access-granted');
+            inputEl.classList.add('shake');
+            inputEl.value = '';
+            inputEl.disabled = false;
+
+            setTimeout(() => {
+                errorEl.classList.remove('visible');
+                inputEl.classList.remove('shake');
+                inputEl.focus();
+            }, 1500);
+            return false;
+        }
+
+        // Store token
+        sessionStorage.setItem('grid_token', token);
+        return true;
+
+    } catch (err) {
+        errorEl.textContent = 'CONNECTION FAILED';
+        errorEl.className = 'visible';
+        inputEl.disabled = false;
+        setTimeout(() => {
+            errorEl.classList.remove('visible');
+            inputEl.focus();
+        }, 1500);
+        return false;
+    }
+}
+
+async function runLoginSequence() {
+    const loginScreen = document.getElementById('login-screen');
+    const promptEl = document.getElementById('login-prompt');
+    const inputEl = document.getElementById('login-input');
+    const errorEl = document.getElementById('login-error');
+    const bootContainer = document.getElementById('boot-sequence');
+    const flashEl = document.getElementById('login-flash');
+
+    // Phase 1: Darkness, then type the prompt
+    await new Promise(r => setTimeout(r, 800));
+    await typeText(promptEl, 'ENTER ACCESS CODE', 60);
+
+    // Phase 2: Show input after typing completes
+    await new Promise(r => setTimeout(r, 300));
+    promptEl.classList.add('cursor-off');
+    inputEl.classList.add('visible');
+    inputEl.focus();
+
+    // Phase 3: Wait for correct password
+    return new Promise(resolve => {
+        inputEl.addEventListener('keydown', async function handler(e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+
+            const success = await attemptLogin(inputEl, errorEl);
+            if (!success) return;
+
+            // Remove the handler
+            inputEl.removeEventListener('keydown', handler);
+
+            // Phase 4: Access granted
+            inputEl.classList.remove('visible');
+            promptEl.style.display = 'none';
+            errorEl.textContent = 'ACCESS GRANTED';
+            errorEl.className = 'visible access-granted';
+
+            await new Promise(r => setTimeout(r, 800));
+            errorEl.classList.remove('visible');
+
+            // Phase 5: Boot sequence
+            await new Promise(r => setTimeout(r, 300));
+            await playBootSequence(bootContainer);
+
+            // Phase 6: Flash and reveal
+            flashEl.classList.add('active');
+            await new Promise(r => setTimeout(r, 200));
+
+            loginScreen.style.display = 'none';
+            flashEl.classList.remove('active');
+            document.getElementById('app').style.display = '';
+
+            resolve();
+        });
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+//  GRID INITIALIZATION (after login)
+// ═══════════════════════════════════════════════════════
+
+function initGrid() {
     const canvas = document.getElementById('town-canvas');
     renderer = new TownRenderer(canvas);
 
@@ -1063,4 +1245,24 @@ window.addEventListener('DOMContentLoaded', () => {
     setInterval(pollAcquisition, ACQ_POLL_INTERVAL);
     setInterval(pollCronStatus, CRON_POLL_INTERVAL);
     setInterval(pollOverseerLog, OVERSEER_POLL_INTERVAL);
+}
+
+// ═══════════════════════════════════════════════════════
+//  ENTRY POINT
+// ═══════════════════════════════════════════════════════
+
+window.addEventListener('DOMContentLoaded', async () => {
+    // Check for existing session token
+    const existingToken = sessionStorage.getItem('grid_token');
+    if (existingToken) {
+        // Skip login, go straight to grid
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = '';
+        initGrid();
+        return;
+    }
+
+    // Run the full login sequence
+    await runLoginSequence();
+    initGrid();
 });

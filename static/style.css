@@ -1066,3 +1066,211 @@ body {
     );
     z-index: 1000;
 }
+
+/* ═══════════════════════════════════════════
+   LOGIN SCREEN
+   ═══════════════════════════════════════════ */
+
+#login-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#login-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    min-width: 320px;
+}
+
+/* Typed prompt text */
+#login-prompt {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: #00DFFC;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px #00DFFC, 0 0 30px rgba(0,223,252,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 2px solid #00DFFC;
+    width: 0;
+    animation: cursor-blink 0.8s step-end infinite;
+}
+
+#login-prompt.typing-done {
+    animation: cursor-blink 0.8s step-end infinite;
+}
+
+#login-prompt.cursor-off {
+    border-right-color: transparent;
+    animation: none;
+}
+
+@keyframes cursor-blink {
+    0%, 100% { border-right-color: #00DFFC; }
+    50% { border-right-color: transparent; }
+}
+
+/* Password input */
+#login-input {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #00DFFC;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #0a2a3a;
+    padding: 8px 4px;
+    width: 280px;
+    text-align: center;
+    outline: none;
+    opacity: 0;
+    transition: opacity 0.4s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#login-input.visible {
+    opacity: 1;
+}
+
+#login-input:focus {
+    border-bottom-color: #00DFFC;
+    box-shadow: 0 2px 12px rgba(0,223,252,0.3);
+}
+
+#login-input::placeholder {
+    color: #0a2a3a;
+    letter-spacing: 2px;
+    font-size: 10px;
+}
+
+/* Error message */
+#login-error {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #FF3366;
+    text-shadow: 0 0 8px #FF3366, 0 0 20px rgba(255,51,102,0.4);
+    height: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#login-error.visible {
+    opacity: 1;
+}
+
+#login-error.access-granted {
+    color: #00FF88;
+    text-shadow: 0 0 8px #00FF88, 0 0 20px rgba(0,255,136,0.4);
+}
+
+/* Shake animation for wrong password */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 50%, 90% { transform: translateX(-6px); }
+    30%, 70% { transform: translateX(6px); }
+}
+
+#login-input.shake {
+    animation: shake 0.4s ease;
+    border-bottom-color: #FF3366;
+    box-shadow: 0 2px 12px rgba(255,51,102,0.4);
+}
+
+/* Boot sequence */
+#boot-sequence {
+    text-align: left;
+    width: 400px;
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.boot-line {
+    font-family: 'Rajdhani', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #00DFFC;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.boot-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.boot-line.agent-line {
+    color: #7FDBFF;
+    padding-left: 8px;
+}
+
+.boot-line .status-ok {
+    color: #00FF88;
+    text-shadow: 0 0 4px rgba(0,255,136,0.4);
+}
+
+.boot-line .status-label {
+    color: #3a6a7a;
+}
+
+.boot-line.final-line {
+    color: #00FF88;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-shadow: 0 0 10px #00FF88, 0 0 20px rgba(0,255,136,0.4);
+    margin-top: 8px;
+    letter-spacing: 3px;
+}
+
+/* Cyan flash overlay */
+#login-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(ellipse at center, rgba(0,223,252,0.4) 0%, transparent 70%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10001;
+    transition: opacity 0.15s ease;
+}
+
+#login-flash.active {
+    opacity: 1;
+}
+
+/* Scanlines on login screen too */
+#login-screen::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0, 223, 252, 0.012) 3px,
+        rgba(0, 223, 252, 0.012) 4px
+    );
+    z-index: 10002;
+}
