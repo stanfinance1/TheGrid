@@ -1,7 +1,7 @@
-"""Workshop Town Hive - Visualization Server.
+"""The Grid - Hive Visualization Server.
 
-Serves the pixel art dashboard and provides API endpoints
-for real-time agent state and work item data from Supabase.
+Tron Legacy-themed dashboard serving real-time agent state
+and work item data from Supabase.
 
 Self-contained: no parent directory imports needed (deploys standalone on Railway).
 """
@@ -113,7 +113,7 @@ async def lifespan(app):
     yield
     task.cancel()
 
-app = FastAPI(title="Workshop Town Viz", lifespan=lifespan)
+app = FastAPI(title="The Grid Viz", lifespan=lifespan)
 app.middleware("http")(_auth_middleware)
 
 static_dir = Path(__file__).parent / "static"

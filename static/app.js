@@ -1,5 +1,5 @@
 /**
- * Workshop Town - Main Application
+ * THE GRID - Main Application
  *
  * Agent movement state machine, Supabase polling, event log, render loop.
  * Agents walk between their buildings and the dispatch center when tasks arrive.
@@ -494,7 +494,7 @@ function renderControlCenter() {
 //  TODO LIST (localStorage)
 // ═══════════════════════════════════════════════════════
 
-const TODO_STORAGE_KEY = 'workshoptown_todos';
+const TODO_STORAGE_KEY = 'thegrid_todos';
 let todos = [];
 let selectedUrgency = 'low';
 
@@ -872,7 +872,7 @@ async function checkHealth() {
         healthErrors = 0;
         if (!connected) {
             connected = true;
-            addEvent('system', 'Connected to Hive');
+            addEvent('system', 'Connected to The Grid');
             if (connEl) { connEl.textContent = 'LIVE'; connEl.className = 'conn-live'; }
         }
     } catch (err) {
@@ -1045,13 +1045,13 @@ window.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', e => {
         if (e.key === 'f' || e.key === 'F') {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            addEvent('system', 'GRAND FINALE!');
+            addEvent('system', 'LIGHT SHOW!');
             spawnGrandFinale();
         }
     });
 
     // Start
-    addEvent('system', 'Workshop Town starting...');
+    addEvent('system', 'The Grid initializing...');
     gameLoop();
     checkHealth();
     pollState();

@@ -1,13 +1,34 @@
 /**
- * Workshop Town - Stardew Valley Style Renderer (2x Resolution)
+ * THE GRID - Tron Legacy Style Renderer (2x Resolution)
  *
  * Top-down 3/4 view. Scene is 480x320 pixel-art pixels at 2x scale (960x640).
- * Buildings have chimneys, textured walls, multi-pane windows, flower boxes.
- * Fountain with animated water effects near dispatch plaza.
+ * Wireframe towers, light trail roads, data portal, neon circuit aesthetic.
  */
 
 const SCENE_W = 480;
 const SCENE_H = 320;
+
+// ═══════════════════════════════════════════════════════
+//  TRON COLOR CONSTANTS
+// ═══════════════════════════════════════════════════════
+
+const TRON = {
+    BLACK:      '#000000',
+    VOID:       '#000510',
+    PANEL:      '#050510',
+    GRID_DIM:   '#0a1a2a',
+    GRID_LINE:  '#0a2a3a',
+    GRID_BRIGHT:'#1a3a4a',
+    CYAN:       '#00DFFC',
+    CYAN_DIM:   '#004A5A',
+    CYAN_DARK:  '#003040',
+    CYAN_DEEP:  '#001a2a',
+    ORANGE:     '#FF6100',
+    GREEN:      '#00FF88',
+    PINK:       '#FF3366',
+    TEXT:        '#7FDBFF',
+    TEXT_DIM:    '#3a6a7a',
+};
 
 // ═══════════════════════════════════════════════════════
 //  PARTICLES
@@ -33,7 +54,7 @@ function spawnDust(x, y) {
         particles.push(new Particle(
             x + (Math.random() - 0.5) * 8,
             y + 12 + Math.random() * 4,
-            '#9B8365',
+            Math.random() > 0.5 ? TRON.CYAN : TRON.CYAN_DIM,
             12 + Math.floor(Math.random() * 8),
             (Math.random() - 0.5) * 0.3,
             -0.1 - Math.random() * 0.15,
@@ -47,7 +68,7 @@ function spawnSparkle(x, y, color) {
         particles.push(new Particle(
             x + (Math.random() - 0.5) * 20,
             y + (Math.random() - 0.5) * 20,
-            color || '#FFDD44',
+            color || TRON.CYAN,
             20 + Math.floor(Math.random() * 15),
             (Math.random() - 0.5) * 0.4,
             -0.15 - Math.random() * 0.25,
@@ -57,7 +78,7 @@ function spawnSparkle(x, y, color) {
 }
 
 function spawnCompletionBurst(x, y) {
-    const colors = ['#FFDD44', '#44FF88', '#44DDFF', '#FF88CC'];
+    const colors = [TRON.CYAN, TRON.GREEN, TRON.ORANGE, TRON.PINK];
     for (let i = 0; i < 20; i++) {
         const angle = (i / 20) * Math.PI * 2;
         particles.push(new Particle(
@@ -72,20 +93,20 @@ function spawnCompletionBurst(x, y) {
 }
 
 // ═══════════════════════════════════════════════════════
-//  FIREWORKS
+//  FIREWORKS (Tron palette)
 // ═══════════════════════════════════════════════════════
 
 const fireworks = [];
 const fireworkParticles = [];
 
 const FIREWORK_PALETTES = [
-    ['#FF4444', '#FF6666', '#FF8888', '#FFAAAA'],
-    ['#44FF44', '#66FF66', '#88FF88', '#AAFFAA'],
-    ['#4488FF', '#66AAFF', '#88CCFF', '#AADDFF'],
-    ['#FFDD44', '#FFEE66', '#FFFF88', '#FFFFAA'],
-    ['#FF44DD', '#FF66EE', '#FF88FF', '#FFAAFF'],
-    ['#44FFEE', '#66FFFF', '#88FFFF', '#BBFFFF'],
-    ['#FF8844', '#FFAA66', '#FFCC88', '#FFDDAA'],
+    ['#00DFFC', '#33E8FF', '#66F0FF', '#99F5FF'],     // cyan
+    ['#00FF88', '#33FFAA', '#66FFCC', '#99FFDD'],     // neon green
+    ['#FF6100', '#FF8133', '#FF9E66', '#FFBB99'],     // neon orange
+    ['#FF3366', '#FF6688', '#FF99AA', '#FFCCCC'],     // hot pink
+    ['#CC44FF', '#DD77FF', '#EE99FF', '#FFBBFF'],     // neon purple
+    ['#4488FF', '#77AAFF', '#99CCFF', '#BBDDFF'],     // neon blue
+    ['#FFFFFF', '#CCEFFF', '#99DFFF', '#66CFFF'],     // white-to-cyan
 ];
 
 class FireworkRocket {
@@ -180,24 +201,22 @@ function spawnFireworks(x, y) {
 }
 
 /**
- * GRAND FINALE -- Massive fireworks show across the entire scene.
- * Launches 40+ rockets in waves from multiple positions with staggered timing.
- * Triggered by pressing 'F' key or after all agents complete a convoy.
+ * LIGHT SHOW -- Massive fireworks across the entire scene.
  */
 function spawnGrandFinale() {
     const launchPoints = [
-        { x: 60, y: 300 },    // left
-        { x: 160, y: 300 },   // center-left
-        { x: 240, y: 300 },   // center
-        { x: 320, y: 300 },   // center-right
-        { x: 420, y: 300 },   // right
-        { x: 100, y: 280 },   // mid-left
-        { x: 380, y: 280 },   // mid-right
+        { x: 60, y: 300 },
+        { x: 160, y: 300 },
+        { x: 240, y: 300 },
+        { x: 320, y: 300 },
+        { x: 420, y: 300 },
+        { x: 100, y: 280 },
+        { x: 380, y: 280 },
     ];
 
     let delay = 0;
 
-    // Wave 1: scattered rockets (0-30 frames)
+    // Wave 1: scattered rockets
     for (let w = 0; w < 3; w++) {
         for (const pt of launchPoints) {
             const palette = FIREWORK_PALETTES[Math.floor(Math.random() * FIREWORK_PALETTES.length)];
@@ -208,7 +227,7 @@ function spawnGrandFinale() {
         delay += 30;
     }
 
-    // Wave 2: rapid-fire center burst (90-120 frames)
+    // Wave 2: rapid-fire center burst
     for (let i = 0; i < 15; i++) {
         const palette = FIREWORK_PALETTES[Math.floor(Math.random() * FIREWORK_PALETTES.length)];
         const x = 160 + Math.random() * 160;
@@ -216,7 +235,7 @@ function spawnGrandFinale() {
     }
     delay += 50;
 
-    // Wave 3: grand crescendo -- everything at once
+    // Wave 3: grand crescendo
     for (let i = 0; i < 20; i++) {
         const palette = FIREWORK_PALETTES[Math.floor(Math.random() * FIREWORK_PALETTES.length)];
         const x = 30 + Math.random() * 420;
@@ -300,13 +319,13 @@ class TownRenderer {
 
     text(str, x, y, color, size) {
         const ctx = this.ctx;
-        ctx.fillStyle = color || '#FFFFFF';
-        ctx.font = `${size || 10}px "Press Start 2P", monospace`;
+        ctx.fillStyle = color || TRON.CYAN;
+        ctx.font = `${size || 10}px "Orbitron", "Rajdhani", monospace`;
         ctx.textAlign = 'center';
         ctx.fillText(str, x * this.pixel, y * this.pixel);
     }
 
-    // ─── Background: Grass ─────────────────────────
+    // ─── Background: Grid Void ──────────────────────
 
     initGrass() {
         const p = this.pixel;
@@ -315,22 +334,27 @@ class TownRenderer {
         off.height = SCENE_H * p;
         const ctx = off.getContext('2d');
 
+        // Pure black void
+        ctx.fillStyle = TRON.BLACK;
+        ctx.fillRect(0, 0, SCENE_W * p, SCENE_H * p);
+
+        const GRID_SPACING = 16;
+
+        // Draw subtle grid lines
         for (let y = 0; y < SCENE_H; y++) {
-            for (let x = 0; x < SCENE_W; x++) {
-                const ci = ((x * 7 + y * 13) ^ (x * 3 + y * 5)) % GRASS_COLORS.length;
-                ctx.fillStyle = GRASS_COLORS[ci];
-                ctx.fillRect(x * p, y * p, p, p);
-            }
+            const isMajor = (y % (GRID_SPACING * 5)) === 0;
+            const isMinor = (y % GRID_SPACING) === 0;
+            if (!isMinor && !isMajor) continue;
+            ctx.fillStyle = isMajor ? TRON.GRID_BRIGHT : TRON.GRID_DIM;
+            ctx.fillRect(0, y * p, SCENE_W * p, Math.max(1, Math.floor(p * 0.5)));
         }
 
-        // More flowers for larger scene
-        const rng = this.seededRandom(42);
-        for (let i = 0; i < 300; i++) {
-            const fx = Math.floor(rng() * SCENE_W);
-            const fy = Math.floor(rng() * SCENE_H);
-            const fc = GRASS_FLOWER_COLORS[Math.floor(rng() * GRASS_FLOWER_COLORS.length)];
-            ctx.fillStyle = fc;
-            ctx.fillRect(fx * p, fy * p, p, p);
+        for (let x = 0; x < SCENE_W; x++) {
+            const isMajor = (x % (GRID_SPACING * 5)) === 0;
+            const isMinor = (x % GRID_SPACING) === 0;
+            if (!isMinor && !isMajor) continue;
+            ctx.fillStyle = isMajor ? TRON.GRID_BRIGHT : TRON.GRID_DIM;
+            ctx.fillRect(x * p, 0, Math.max(1, Math.floor(p * 0.5)), SCENE_H * p);
         }
 
         this.grassCache = off;
@@ -347,9 +371,14 @@ class TownRenderer {
         this.ctx.drawImage(this.grassCache, 0, 0);
     }
 
-    // ─── Background: Roads ─────────────────────────
+    // ─── Background: Light Trail Roads ──────────────
 
     drawRoads() {
+        const TRAIL_FILL = TRON.CYAN_DEEP;
+        const TRAIL_EDGE = TRON.CYAN;
+        const TRAIL_CENTER = TRON.CYAN_DARK;
+        const glowAlpha = 0.12 + Math.sin(this.time * 1.5) * 0.04;
+
         for (const seg of ROAD_SEGMENTS) {
             const x1 = Math.min(seg.x1, seg.x2);
             const y1 = Math.min(seg.y1, seg.y2);
@@ -358,178 +387,131 @@ class TownRenderer {
             const hw = Math.floor(seg.w / 2);
 
             if (x1 === x2) {
-                // Vertical road
-                this.rect(x1 - hw, y1, seg.w, y2 - y1 + 1, DIRT_COLOR);
-                // Edge stones
-                this.rect(x1 - hw, y1, 1, y2 - y1 + 1, DIRT_DARK);
-                this.rect(x1 + hw, y1, 1, y2 - y1 + 1, DIRT_DARK);
-                // Gravel texture (denser)
-                const rng = this.seededRandom(x1 * 100 + y1);
-                for (let ty = y1; ty < y2; ty += 3) {
-                    const tx = x1 - hw + 1 + Math.floor(rng() * (seg.w - 2));
-                    this.px(tx, ty, DIRT_LIGHT);
-                    // Pebbles
-                    if (rng() < 0.35) {
-                        const px2 = x1 - hw + 2 + Math.floor(rng() * (seg.w - 4));
-                        this.px(px2, ty + 1, '#7a6345');
-                    }
-                    if (rng() < 0.2) {
-                        const px3 = x1 - hw + 1 + Math.floor(rng() * (seg.w - 2));
-                        this.px(px3, ty + 2, '#a89375');
-                    }
-                }
-                // Wheel ruts
-                if (seg.w >= 8) {
-                    for (let ty2 = y1 + 2; ty2 < y2; ty2 += 2) {
-                        this.ctx.globalAlpha = 0.12;
-                        this.px(x1 - 1, ty2, DIRT_DARK);
-                        this.px(x1 + 1, ty2, DIRT_DARK);
-                        this.ctx.globalAlpha = 1;
-                    }
-                }
+                // Vertical light trail
+                this.rect(x1 - hw, y1, seg.w, y2 - y1 + 1, TRAIL_FILL);
+                // Neon edges
+                this.rect(x1 - hw, y1, 1, y2 - y1 + 1, TRAIL_EDGE);
+                this.rect(x1 + hw, y1, 1, y2 - y1 + 1, TRAIL_EDGE);
+                // Center pulse line
+                this.rect(x1, y1, 1, y2 - y1 + 1, TRAIL_CENTER);
+                // Edge glow bleed
+                this.ctx.globalAlpha = glowAlpha;
+                this.rect(x1 - hw - 2, y1, 3, y2 - y1 + 1, TRON.CYAN);
+                this.rect(x1 + hw, y1, 3, y2 - y1 + 1, TRON.CYAN);
+                this.ctx.globalAlpha = 1;
+                // Data pulse traveling along trail
+                const pulsePos = ((this.time * 40 + x1 * 3) % (y2 - y1)) + y1;
+                this.ctx.globalAlpha = 0.6;
+                this.rect(x1 - hw + 1, pulsePos, seg.w - 2, 2, TRON.CYAN);
+                this.ctx.globalAlpha = 1;
             } else {
-                // Horizontal road
-                this.rect(x1, y1 - hw, x2 - x1 + 1, seg.w, DIRT_COLOR);
-                this.rect(x1, y1 - hw, x2 - x1 + 1, 1, DIRT_DARK);
-                this.rect(x1, y1 + hw, x2 - x1 + 1, 1, DIRT_DARK);
-                // Gravel texture
-                const rng = this.seededRandom(x1 + y1 * 100);
-                for (let tx = x1; tx < x2; tx += 3) {
-                    const ty = y1 - hw + 1 + Math.floor(rng() * (seg.w - 2));
-                    this.px(tx, ty, DIRT_LIGHT);
-                    if (rng() < 0.35) {
-                        const py2 = y1 - hw + 2 + Math.floor(rng() * (seg.w - 4));
-                        this.px(tx + 1, py2, '#7a6345');
-                    }
-                    if (rng() < 0.2) {
-                        const py3 = y1 - hw + 1 + Math.floor(rng() * (seg.w - 2));
-                        this.px(tx + 2, py3, '#a89375');
-                    }
-                }
-                // Wheel ruts
-                if (seg.w >= 8) {
-                    for (let tx2 = x1 + 2; tx2 < x2; tx2 += 2) {
-                        this.ctx.globalAlpha = 0.12;
-                        this.px(tx2, y1 - 1, DIRT_DARK);
-                        this.px(tx2, y1 + 1, DIRT_DARK);
-                        this.ctx.globalAlpha = 1;
-                    }
-                }
+                // Horizontal light trail
+                this.rect(x1, y1 - hw, x2 - x1 + 1, seg.w, TRAIL_FILL);
+                this.rect(x1, y1 - hw, x2 - x1 + 1, 1, TRAIL_EDGE);
+                this.rect(x1, y1 + hw, x2 - x1 + 1, 1, TRAIL_EDGE);
+                this.rect(x1, y1, x2 - x1 + 1, 1, TRAIL_CENTER);
+                // Edge glow bleed
+                this.ctx.globalAlpha = glowAlpha;
+                this.rect(x1, y1 - hw - 2, x2 - x1 + 1, 3, TRON.CYAN);
+                this.rect(x1, y1 + hw, x2 - x1 + 1, 3, TRON.CYAN);
+                this.ctx.globalAlpha = 1;
+                // Data pulse
+                const pulsePos = ((this.time * 40 + y1 * 3) % (x2 - x1)) + x1;
+                this.ctx.globalAlpha = 0.6;
+                this.rect(pulsePos, y1 - hw + 1, 2, seg.w - 2, TRON.CYAN);
+                this.ctx.globalAlpha = 1;
             }
         }
 
-        // Dispatch plaza
+        // Dispatch nexus platform
         const plx = DISPATCH.x - 12;
         const ply = DISPATCH.y - 8;
         const plw = DISPATCH.w + 24;
         const plh = DISPATCH.h + 16;
-        this.rect(plx, ply, plw, plh, DIRT_COLOR);
-        // Plaza border stones
-        this.rect(plx, ply, plw, 1, DIRT_DARK);
-        this.rect(plx, ply + plh - 1, plw, 1, DIRT_DARK);
-        this.rect(plx, ply, 1, plh, DIRT_DARK);
-        this.rect(plx + plw - 1, ply, 1, plh, DIRT_DARK);
-        // Cobblestone pattern
-        const plRng = this.seededRandom(999);
-        for (let ty = ply + 2; ty < ply + plh - 2; ty += 3) {
-            const rowOff = (Math.floor(ty / 3) % 2) * 2;
-            for (let tx = plx + 2 + rowOff; tx < plx + plw - 2; tx += 5) {
-                this.rect(tx, ty, 3, 2, plRng() > 0.5 ? '#8a7a60' : '#7a6a50');
-                this.px(tx + 3, ty, '#6a5a40');
-                this.px(tx, ty + 2, '#6a5a40');
-            }
+        this.rect(plx, ply, plw, plh, TRON.VOID);
+        // Nexus border
+        this.rect(plx, ply, plw, 1, TRON.CYAN);
+        this.rect(plx, ply + plh - 1, plw, 1, TRON.CYAN);
+        this.rect(plx, ply, 1, plh, TRON.CYAN);
+        this.rect(plx + plw - 1, ply, 1, plh, TRON.CYAN);
+        // Interior crosshairs
+        this.ctx.globalAlpha = 0.15;
+        this.rect(plx + Math.floor(plw / 2), ply + 1, 1, plh - 2, TRON.CYAN);
+        this.rect(plx + 1, ply + Math.floor(plh / 2), plw - 2, 1, TRON.CYAN);
+        this.ctx.globalAlpha = 1;
+        // Corner nodes
+        const cn = [[plx, ply], [plx + plw - 3, ply], [plx, ply + plh - 3], [plx + plw - 3, ply + plh - 3]];
+        for (const [cx, cy] of cn) {
+            this.rect(cx, cy, 3, 3, TRON.CYAN);
         }
     }
 
-    // ─── Buildings (detailed) ─────────────────────
+    // ─── Buildings: Wireframe Towers ─────────────────
 
     drawBuilding(cfg) {
-        const { x, y, w, h, roofColor, wallColor, label } = cfg;
+        const { x, y, w, h, roofColor, label } = cfg;
 
-        // Shadow
-        this.rect(x + 3, y + 3, w, h, 'rgba(0,0,0,0.15)');
+        // Dark tower fill
+        this.rect(x, y, w, h, TRON.VOID);
 
-        // Foundation
-        this.rect(x - 1, y + h - 2, w + 2, 3, '#3a2a1a');
+        // Wireframe outline in agent's neon color
+        this.rect(x, y, w, 1, roofColor);
+        this.rect(x, y + h - 1, w, 1, roofColor);
+        this.rect(x, y, 1, h, roofColor);
+        this.rect(x + w - 1, y, 1, h, roofColor);
 
-        // Walls
-        this.rect(x, y + 8, w, h - 8, wallColor);
-        // Wall texture (stone/wood grain)
-        const rng = this.seededRandom(x * 7 + y * 13);
-        for (let ty = y + 9; ty < y + h - 2; ty += 3) {
-            for (let tx = x + 1; tx < x + w - 1; tx += 4) {
-                const offset = Math.floor(rng() * 3);
-                this.px(tx + offset, ty, '#6a5a4a');
-            }
+        // Interior circuit lines (horizontal data streams)
+        this.ctx.globalAlpha = 0.12;
+        for (let ty = y + 4; ty < y + h - 2; ty += 6) {
+            this.rect(x + 1, ty, w - 2, 1, roofColor);
         }
-        // Wall highlight stripe
-        this.rect(x + 1, y + 9, w - 2, 1, '#6a5a4a');
-
-        // Roof (extends past walls)
-        this.rect(x - 2, y, w + 4, 9, roofColor);
-        // Roof ridge
-        this.rect(x, y + 1, w, 1, this.lighten(roofColor, 40));
-        this.rect(x - 1, y + 2, w + 2, 1, this.lighten(roofColor, 20));
-        // Roof shingle lines
-        this.rect(x - 2, y + 4, w + 4, 1, this.darken(roofColor, 15));
-        this.rect(x - 2, y + 7, w + 4, 1, this.darken(roofColor, 15));
-        // Roof edge shadow
-        this.rect(x - 2, y + 8, w + 4, 1, this.darken(roofColor, 50));
-
-        // Chimney
-        const cx = x + w - 8;
-        this.rect(cx, y - 5, 5, 7, '#6a4a3a');
-        this.rect(cx + 1, y - 5, 3, 1, '#7a5a4a');
-        this.rect(cx, y - 6, 7, 2, '#5a3a2a');
-        // Smoke (animated)
-        if (Math.sin(this.time * 1.5 + x) > -0.3) {
-            const sy = y - 8 - Math.sin(this.time * 2 + x * 0.1) * 3;
-            this.ctx.globalAlpha = 0.25;
-            this.px(cx + 2, sy, '#AAAAAA');
-            this.px(cx + 3, sy - 1, '#BBBBBB');
-            this.px(cx + 1, sy - 2, '#CCCCCC');
-            this.ctx.globalAlpha = 1;
+        // Vertical circuit lines
+        for (let tx = x + 6; tx < x + w - 2; tx += 8) {
+            this.rect(tx, y + 1, 1, h - 2, roofColor);
         }
+        this.ctx.globalAlpha = 1;
 
-        // Door
-        const dx = x + Math.floor(w / 2) - 3;
-        this.rect(dx, y + h - 10, 7, 10, '#2a1a10');
-        this.rect(dx + 1, y + h - 9, 5, 8, '#3a2a1a');
-        // Door arch
-        this.rect(dx + 1, y + h - 10, 5, 1, '#4a3a2a');
-        // Door handle
-        this.px(dx + 5, y + h - 5, '#C8A858');
+        // Corner accent nodes (3x3)
+        this.rect(x, y, 3, 3, roofColor);
+        this.rect(x + w - 3, y, 3, 3, roofColor);
+        this.rect(x, y + h - 3, 3, 3, roofColor);
+        this.rect(x + w - 3, y + h - 3, 3, 3, roofColor);
 
-        // Windows (multi-pane with shutters)
+        // Data display panels (windows)
         if (w >= 30) {
-            this.drawWindow(x + 4, y + 12, roofColor);
-            this.drawWindow(x + w - 12, y + 12, roofColor);
+            this.drawWindow(x + 5, y + 12, roofColor);
+            this.drawWindow(x + w - 13, y + 12, roofColor);
         }
 
-        // Label below building (white, larger)
-        this.text(label, x + w / 2, y + h + 12, '#FFFFFF', 12);
+        // Top antenna/spire
+        const spireX = x + Math.floor(w / 2);
+        this.rect(spireX, y - 8, 1, 8, roofColor);
+        this.rect(spireX - 2, y - 10, 5, 2, roofColor);
+        // Spire glow pulse
+        const spireGlow = 0.4 + Math.sin(this.time * 2 + x * 0.05) * 0.25;
+        this.ctx.globalAlpha = spireGlow;
+        this.rect(spireX - 1, y - 11, 3, 3, roofColor);
+        this.ctx.globalAlpha = spireGlow * 0.3;
+        this.rect(spireX - 3, y - 13, 7, 5, roofColor);
+        this.ctx.globalAlpha = 1;
+
+        // Label
+        this.text(label, x + w / 2, y + h + 12, roofColor, 10);
     }
 
     drawWindow(wx, wy, accentColor) {
-        // Shutters
-        this.rect(wx - 1, wy, 1, 7, this.darken(accentColor, 20));
-        this.rect(wx + 8, wy, 1, 7, this.darken(accentColor, 20));
-        // Window frame
-        this.rect(wx, wy, 8, 7, '#445566');
-        // Glass panes (2x2 grid)
-        this.rect(wx + 1, wy + 1, 3, 2, '#6688aa');
-        this.rect(wx + 5, wy + 1, 2, 2, '#6688aa');
-        this.rect(wx + 1, wy + 4, 3, 2, '#5577aa');
-        this.rect(wx + 5, wy + 4, 2, 2, '#5577aa');
-        // Highlight
-        this.px(wx + 1, wy + 1, '#88aacc');
-        // Flower box
-        this.rect(wx - 1, wy + 7, 10, 2, '#5a3a2a');
-        // Flowers
-        this.px(wx, wy + 7, '#FF6688');
-        this.px(wx + 3, wy + 7, '#FFDD44');
-        this.px(wx + 6, wy + 7, '#FF6688');
-        this.px(wx + 8, wy + 7, '#88DD44');
+        // Data display panel
+        this.rect(wx, wy, 8, 7, '#000a14');
+        // Frame edges
+        this.rect(wx, wy, 8, 1, accentColor);
+        this.rect(wx, wy + 6, 8, 1, accentColor);
+        this.rect(wx, wy, 1, 7, accentColor);
+        this.rect(wx + 7, wy, 1, 7, accentColor);
+        // Data readout lines
+        this.ctx.globalAlpha = 0.4;
+        this.rect(wx + 2, wy + 2, 4, 1, accentColor);
+        this.rect(wx + 2, wy + 4, 2, 1, accentColor);
+        this.ctx.globalAlpha = 1;
     }
 
     drawDispatchHub() {
@@ -539,94 +521,84 @@ class TownRenderer {
         const bw = d.w + 8;
         const bh = d.h + 16;
 
-        // Shadow
-        this.rect(bx + 3, by + 3, bw, bh, 'rgba(0,0,0,0.15)');
+        const NC = TRON.CYAN;        // nexus color
+        const ND = TRON.CYAN_DIM;    // nexus dim
 
-        // Foundation
-        this.rect(bx - 1, by + bh - 2, bw + 2, 3, '#3a2a1a');
+        // Main body: dark fill
+        this.rect(bx, by, bw, bh, TRON.VOID);
 
-        // Walls
-        this.rect(bx, by + 10, bw, bh - 10, '#5a4a3a');
-        // Wall texture (stone)
-        const rng = this.seededRandom(bx * 7 + by * 13);
-        for (let ty = by + 11; ty < by + bh - 2; ty += 3) {
-            for (let tx = bx + 1; tx < bx + bw - 1; tx += 4) {
-                const offset = Math.floor(rng() * 3);
-                this.px(tx + offset, ty, '#6a5a4a');
-            }
+        // Double border: outer bright, inner dim
+        this.rect(bx, by, bw, 1, NC);
+        this.rect(bx, by + bh - 1, bw, 1, NC);
+        this.rect(bx, by, 1, bh, NC);
+        this.rect(bx + bw - 1, by, 1, bh, NC);
+        // Inner border (inset 2px)
+        this.rect(bx + 2, by + 2, bw - 4, 1, ND);
+        this.rect(bx + 2, by + bh - 3, bw - 4, 1, ND);
+        this.rect(bx + 2, by + 2, 1, bh - 4, ND);
+        this.rect(bx + bw - 3, by + 2, 1, bh - 4, ND);
+
+        // Circuit interior pattern
+        this.ctx.globalAlpha = 0.1;
+        for (let ty = by + 4; ty < by + bh - 2; ty += 5) {
+            this.rect(bx + 3, ty, bw - 6, 1, NC);
         }
-        this.rect(bx + 1, by + 11, bw - 2, 1, '#6a5a4a');
-
-        // Roof (wider, amber/gold to stand out as central building)
-        const roofColor = '#8B6B0B';
-        this.rect(bx - 3, by, bw + 6, 11, roofColor);
-        // Roof ridge
-        this.rect(bx - 1, by + 1, bw + 2, 1, this.lighten(roofColor, 40));
-        this.rect(bx - 2, by + 2, bw + 4, 1, this.lighten(roofColor, 20));
-        // Roof shingle lines
-        this.rect(bx - 3, by + 4, bw + 6, 1, this.darken(roofColor, 15));
-        this.rect(bx - 3, by + 7, bw + 6, 1, this.darken(roofColor, 15));
-        // Roof edge shadow
-        this.rect(bx - 3, by + 10, bw + 6, 1, this.darken(roofColor, 50));
-
-        // Bell tower / cupola (centered above roof)
-        const tw = 14;
-        const tx = bx + Math.floor(bw / 2) - Math.floor(tw / 2);
-        const towerTop = by - 18;
-        // Tower walls
-        this.rect(tx, towerTop + 6, tw, 13, '#6a5a4a');
-        this.rect(tx + 1, towerTop + 7, tw - 2, 1, '#7a6a5a');
-        // Tower roof (peaked)
-        this.rect(tx - 1, towerTop + 4, tw + 2, 3, this.darken(roofColor, 10));
-        this.rect(tx + 1, towerTop + 2, tw - 2, 3, roofColor);
-        this.rect(tx + 3, towerTop, tw - 6, 3, this.lighten(roofColor, 15));
-        // Tower window (arched)
-        this.rect(tx + 4, towerTop + 9, tw - 8, 5, '#445566');
-        this.rect(tx + 5, towerTop + 10, tw - 10, 3, '#6688aa');
-        this.px(tx + 5, towerTop + 10, '#88aacc');
-        // Beacon glow on tower top
-        const glow = 0.4 + Math.sin(this.time * 2) * 0.25;
-        this.ctx.globalAlpha = glow;
-        this.rect(tx + 4, towerTop - 2, tw - 8, 3, '#FFDD44');
-        this.rect(tx + 5, towerTop - 3, tw - 10, 2, '#FFEE88');
+        for (let tx = bx + 6; tx < bx + bw - 2; tx += 7) {
+            this.rect(tx, by + 3, 1, bh - 6, NC);
+        }
         this.ctx.globalAlpha = 1;
 
-        // Chimney (right side)
-        const cx = bx + bw - 8;
-        this.rect(cx, by - 5, 5, 7, '#6a4a3a');
-        this.rect(cx + 1, by - 5, 3, 1, '#7a5a4a');
-        this.rect(cx, by - 6, 7, 2, '#5a3a2a');
-        if (Math.sin(this.time * 1.5 + bx) > -0.3) {
-            const sy = by - 8 - Math.sin(this.time * 2 + bx * 0.1) * 3;
-            this.ctx.globalAlpha = 0.25;
-            this.px(cx + 2, sy, '#AAAAAA');
-            this.px(cx + 3, sy - 1, '#BBBBBB');
-            this.px(cx + 1, sy - 2, '#CCCCCC');
+        // Corner accent nodes (4x4)
+        this.rect(bx, by, 4, 4, NC);
+        this.rect(bx + bw - 4, by, 4, 4, NC);
+        this.rect(bx, by + bh - 4, 4, 4, NC);
+        this.rect(bx + bw - 4, by + bh - 4, 4, 4, NC);
+
+        // Data panels (flanking center)
+        this.drawWindow(bx + 5, by + 6, NC);
+        if (bw >= 40) {
+            this.drawWindow(bx + bw - 13, by + 6, NC);
+        }
+
+        // Central spire / data core
+        const tw = 6;
+        const tx = bx + Math.floor(bw / 2) - 3;
+        const towerTop = by - 24;
+        // Spire shaft
+        this.rect(tx + 2, towerTop, 2, 24, NC);
+        // Horizontal crossbars
+        this.rect(tx, towerTop + 6, tw, 1, ND);
+        this.rect(tx - 2, towerTop + 12, tw + 4, 1, ND);
+        this.rect(tx - 4, towerTop + 18, tw + 8, 2, NC);
+
+        // Pulsing beacon at spire tip
+        const beacon = 0.5 + Math.sin(this.time * 3) * 0.4;
+        this.ctx.globalAlpha = beacon;
+        this.rect(tx + 1, towerTop - 3, 4, 4, NC);
+        this.ctx.globalAlpha = beacon * 0.35;
+        this.rect(tx - 1, towerTop - 5, 8, 8, NC);
+        this.ctx.globalAlpha = 1;
+
+        // Energy beam emanations (rotating dots around hub)
+        const cx = bx + Math.floor(bw / 2);
+        const cy = by + Math.floor(bh / 2);
+        for (let i = 0; i < 6; i++) {
+            const angle = this.time * 0.8 + (i / 6) * Math.PI * 2;
+            const beamR = 10 + Math.sin(this.time * 2 + i) * 3;
+            const ex = cx + Math.cos(angle) * beamR;
+            const ey = cy + Math.sin(angle) * beamR * 0.5;
+            this.ctx.globalAlpha = 0.5;
+            this.px(ex, ey, NC);
+            this.ctx.globalAlpha = 0.2;
+            this.px(ex + Math.cos(angle), ey + Math.sin(angle) * 0.5, NC);
             this.ctx.globalAlpha = 1;
         }
 
-        // Double doors
-        const dx = bx + Math.floor(bw / 2) - 5;
-        this.rect(dx, by + bh - 12, 10, 12, '#2a1a10');
-        this.rect(dx + 1, by + bh - 11, 4, 10, '#3a2a1a');
-        this.rect(dx + 6, by + bh - 11, 3, 10, '#3a2a1a');
-        // Door arch
-        this.rect(dx + 1, by + bh - 12, 8, 1, '#4a3a2a');
-        // Door handles
-        this.px(dx + 4, by + bh - 6, '#C8A858');
-        this.px(dx + 6, by + bh - 6, '#C8A858');
-
-        // Windows (flanking the door)
-        this.drawWindow(bx + 4, by + 14, roofColor);
-        if (bw >= 40) {
-            this.drawWindow(bx + bw - 12, by + 14, roofColor);
-        }
-
         // Label
-        this.text('FOREMAN', bx + bw / 2, by + bh + 12, '#CCBB88', 10);
+        this.text('FOREMAN', bx + bw / 2, by + bh + 12, NC, 10);
     }
 
-    // ─── Fountain ─────────────────────────────────
+    // ─── Data Portal (fountain replacement) ──────────
 
     drawFountain() {
         const f = FOUNTAIN;
@@ -634,101 +606,73 @@ class TownRenderer {
         const cy = f.y;
         const r = f.r;
 
-        // Outer stone rim (octagonal, thick)
-        this.rect(cx - r, cy - r / 2, r * 2, r, '#6a6a6a');
-        this.rect(cx - r + 3, cy - r / 2 - 2, r * 2 - 6, r + 4, '#6a6a6a');
-        // Outer rim highlight
-        this.rect(cx - r + 1, cy - r / 2, r * 2 - 2, 2, '#8a8a8a');
-        this.rect(cx - r + 4, cy - r / 2 - 1, r * 2 - 8, 1, '#9a9a9a');
-        // Outer rim shadow
-        this.rect(cx - r + 1, cy + r / 2 - 1, r * 2 - 2, 2, '#4a4a4a');
-        // Rim texture
-        const rimRng = this.seededRandom(cx * 31 + cy * 17);
-        for (let a = 0; a < 12; a++) {
-            const rx = cx - r + 2 + Math.floor(rimRng() * (r * 2 - 4));
-            const ry = cy - r / 2 + Math.floor(rimRng() * r);
-            this.px(rx, ry, rimRng() > 0.5 ? '#7a7a7a' : '#5a5a5a');
-        }
+        const PC = TRON.CYAN;
+        const PD = TRON.CYAN_DIM;
+        const PI = '#001020';
 
-        // Inner stone rim (second tier)
+        // Outer ring (elliptical top-down)
+        const rh = Math.floor(r * 0.5);
+        this.rect(cx - r, cy - rh, r * 2, r, PD);
+        // Inner void
         const ir = r - 5;
-        this.rect(cx - ir, cy - ir / 2, ir * 2, ir, '#7a7a7a');
-        this.rect(cx - ir + 2, cy - ir / 2 - 1, ir * 2 - 4, ir + 2, '#7a7a7a');
-        this.rect(cx - ir + 1, cy - ir / 2, ir * 2 - 2, 1, '#9a9a9a');
+        const irh = Math.floor(ir * 0.5);
+        this.rect(cx - ir + 1, cy - irh + 1, ir * 2 - 2, ir - 2, PI);
 
-        // Water pool (outer ring)
-        this.rect(cx - r + 3, cy - r / 2 + 3, r * 2 - 6, r - 6, '#2255AA');
-        this.rect(cx - r + 5, cy - r / 2 + 2, r * 2 - 10, r - 4, '#2255AA');
+        // Outer ring neon border
+        this.rect(cx - r, cy - rh, r * 2, 1, PC);
+        this.rect(cx - r, cy + rh - 1, r * 2, 1, PC);
+        this.rect(cx - r, cy - rh, 1, r, PC);
+        this.rect(cx + r - 1, cy - rh, 1, r, PC);
 
-        // Water pool (inner ring - lighter)
-        this.rect(cx - ir + 2, cy - ir / 2 + 2, ir * 2 - 4, ir - 4, '#3366BB');
-
-        // Water shimmer (multiple animated highlights)
-        const shimmer1 = Math.sin(this.time * 3) * 0.15;
-        const shimmer2 = Math.sin(this.time * 2.3 + 1.5) * 0.12;
-        this.ctx.globalAlpha = 0.45 + shimmer1;
-        this.rect(cx - r + 6, cy - r / 2 + 4, 5, 1, '#66AADD');
-        this.rect(cx + 4, cy - 2, 4, 1, '#66AADD');
-        this.rect(cx - 8, cy + 2, 3, 1, '#5599CC');
-        this.ctx.globalAlpha = 0.35 + shimmer2;
-        this.rect(cx + r - 12, cy - r / 2 + 5, 4, 1, '#77BBEE');
-        this.rect(cx - 3, cy + r / 2 - 5, 5, 1, '#5599CC');
+        // Inner ring border
+        this.ctx.globalAlpha = 0.5;
+        this.rect(cx - ir, cy - irh, ir * 2, 1, PC);
+        this.rect(cx - ir, cy + irh - 1, ir * 2, 1, PC);
+        this.rect(cx - ir, cy - irh, 1, ir, PC);
+        this.rect(cx + ir - 1, cy - irh, 1, ir, PC);
         this.ctx.globalAlpha = 1;
 
-        // Center pillar (taller, more detailed)
-        const pillarH = r / 2 + 8;
-        this.rect(cx - 3, cy - r / 2 - pillarH + 4, 6, pillarH, '#777777');
-        this.rect(cx - 2, cy - r / 2 - pillarH + 4, 4, pillarH, '#888888');
-        this.rect(cx - 1, cy - r / 2 - pillarH + 5, 2, pillarH - 2, '#999999');
-        // Pillar base (wider)
-        this.rect(cx - 4, cy - ir / 2 + 1, 8, 3, '#666666');
-        this.rect(cx - 5, cy - ir / 2 + 2, 10, 2, '#555555');
-        // Pillar cap (ornamental)
-        const capY = cy - r / 2 - pillarH + 2;
-        this.rect(cx - 5, capY, 10, 3, '#666666');
-        this.rect(cx - 4, capY - 1, 8, 2, '#777777');
-        this.rect(cx - 3, capY - 2, 6, 2, '#888888');
-
-        // Water spouts (more of them, arcing outward)
-        const spoutY = capY;
-        for (let i = 0; i < 6; i++) {
-            const t = (this.time * 1.8 + i * 0.6) % 3;
-            const angle = (i / 6) * Math.PI * 2 + this.time * 0.3;
-            const dropY = spoutY + t * 4 + (t > 0.8 ? (t - 0.8) * 3 : 0);
-            const dropX = cx + Math.cos(angle) * (3 + t * 2.5);
-            const alpha = t < 2.2 ? 0.65 : 0.2;
+        // Rotating ring data streams (outer)
+        for (let i = 0; i < 10; i++) {
+            const angle = this.time * 1.5 + (i / 10) * Math.PI * 2;
+            const arcX = cx + Math.cos(angle) * (r - 3);
+            const arcY = cy + Math.sin(angle) * ((r - 3) * 0.5);
+            const alpha = 0.3 + (Math.sin(angle * 2) + 1) * 0.25;
             this.ctx.globalAlpha = alpha;
-            this.px(dropX, dropY, '#88CCFF');
-            if (t > 0.5 && t < 2.0) {
-                this.px(dropX + (Math.cos(angle) > 0 ? 1 : -1), dropY + 1, '#77BBEE');
-            }
+            this.px(arcX, arcY, PC);
             this.ctx.globalAlpha = 1;
         }
 
-        // Splash particles at water surface (more frequent)
-        if (Math.random() < 0.1) {
-            const splashAngle = Math.random() * Math.PI * 2;
-            particles.push(new Particle(
-                cx + Math.cos(splashAngle) * (r * 0.5),
-                cy + Math.sin(splashAngle) * (r * 0.25),
-                '#88CCFF',
-                18 + Math.floor(Math.random() * 12),
-                (Math.random() - 0.5) * 0.3,
-                -0.35 - Math.random() * 0.25,
-                1
-            ));
+        // Counter-rotating inner ring (orange)
+        for (let i = 0; i < 8; i++) {
+            const angle = -this.time * 2.3 + (i / 8) * Math.PI * 2;
+            const arcX = cx + Math.cos(angle) * (ir - 2);
+            const arcY = cy + Math.sin(angle) * ((ir - 2) * 0.5);
+            this.ctx.globalAlpha = 0.45;
+            this.px(arcX, arcY, TRON.ORANGE);
+            this.ctx.globalAlpha = 1;
         }
 
-        // Decorative corner posts on outer rim
-        const posts = [
-            { x: cx - r + 1, y: cy - r / 2 },
-            { x: cx + r - 2, y: cy - r / 2 },
-            { x: cx - r + 1, y: cy + r / 2 - 2 },
-            { x: cx + r - 2, y: cy + r / 2 - 2 },
-        ];
-        for (const p of posts) {
-            this.rect(p.x, p.y, 2, 2, '#555555');
-            this.px(p.x, p.y, '#8a8a8a');
+        // Portal core glow (center pulse)
+        const coreGlow = 0.2 + Math.sin(this.time * 2.5) * 0.15;
+        this.ctx.globalAlpha = coreGlow;
+        this.rect(cx - 3, cy - 2, 6, 4, PC);
+        this.ctx.globalAlpha = coreGlow * 0.4;
+        this.rect(cx - 5, cy - 3, 10, 6, PC);
+        this.ctx.globalAlpha = 1;
+
+        // Data fragment particle emissions
+        if (Math.random() < 0.1) {
+            const angle = Math.random() * Math.PI * 2;
+            particles.push(new Particle(
+                cx + Math.cos(angle) * (ir * 0.6),
+                cy + Math.sin(angle) * (ir * 0.3),
+                Math.random() > 0.5 ? TRON.CYAN : TRON.ORANGE,
+                20 + Math.floor(Math.random() * 15),
+                (Math.random() - 0.5) * 0.2,
+                -0.4 - Math.random() * 0.3,
+                1
+            ));
         }
     }
 
@@ -740,63 +684,39 @@ class TownRenderer {
         this.drawDispatchHub();
     }
 
-    // ─── Bushes ──────────────────────────────────────
+    // ─── Data Nodes (bush replacement) ──────────────
 
     drawBush(bx, by, size) {
-        const rng = this.seededRandom(bx * 23 + by * 37);
-        const colors = ['#2a6a1a', '#327a22', '#1e5e14', '#3a8a2a'];
-        const darkColors = ['#1a5a0a', '#225a12', '#164e0c'];
-        const flowerColors = ['#FF8899', '#FFDD55', '#FF6688', '#AADDFF'];
+        const NC = TRON.CYAN;
+        const ND = TRON.CYAN_DARK;
 
         if (size === 1) {
-            // Small bush: 6x4 cluster
-            for (let dy = 0; dy < 4; dy++) {
-                for (let dx = 0; dx < 6; dx++) {
-                    if ((dx === 0 || dx === 5) && (dy === 0 || dy === 3)) continue;
-                    this.px(bx + dx, by + dy, colors[Math.floor(rng() * colors.length)]);
-                }
-            }
-            // Shadow at base
-            this.ctx.globalAlpha = 0.2;
-            this.rect(bx + 1, by + 4, 4, 1, '#000000');
+            // Small data terminal: 6x4 diamond
+            this.rect(bx + 2, by, 2, 1, NC);
+            this.rect(bx + 1, by + 1, 4, 1, ND);
+            this.rect(bx + 1, by + 2, 4, 1, ND);
+            this.rect(bx + 2, by + 3, 2, 1, NC);
+            // Center glow pulse
+            const g = 0.3 + Math.sin(this.time * 2 + bx * 0.1) * 0.25;
+            this.ctx.globalAlpha = g;
+            this.px(bx + 2, by + 1, NC);
+            this.px(bx + 3, by + 2, NC);
             this.ctx.globalAlpha = 1;
-            // Highlight
-            this.px(bx + 2, by, '#4aaa3a');
         } else {
-            // Large bush: 10x6 cluster (two overlapping mounds)
-            // Left mound
-            for (let dy = 1; dy < 6; dy++) {
-                for (let dx = 0; dx < 7; dx++) {
-                    if ((dx === 0 || dx === 6) && (dy <= 1 || dy >= 5)) continue;
-                    this.px(bx + dx, by + dy, colors[Math.floor(rng() * colors.length)]);
-                }
-            }
-            // Right mound (overlapping)
-            for (let dy = 0; dy < 5; dy++) {
-                for (let dx = 4; dx < 10; dx++) {
-                    if ((dx === 4 || dx === 9) && (dy === 0 || dy >= 4)) continue;
-                    this.px(bx + dx, by + dy, colors[Math.floor(rng() * colors.length)]);
-                }
-            }
-            // Dark spots for depth
-            for (let i = 0; i < 4; i++) {
-                const sx = bx + 1 + Math.floor(rng() * 8);
-                const sy = by + 2 + Math.floor(rng() * 3);
-                this.px(sx, sy, darkColors[Math.floor(rng() * darkColors.length)]);
-            }
-            // Highlights
-            this.px(bx + 2, by + 1, '#4aaa3a');
-            this.px(bx + 6, by, '#4aaa3a');
-            // Occasional flower
-            if (rng() > 0.4) {
-                this.px(bx + 3, by + 1, flowerColors[Math.floor(rng() * flowerColors.length)]);
-            }
-            if (rng() > 0.5) {
-                this.px(bx + 7, by, flowerColors[Math.floor(rng() * flowerColors.length)]);
-            }
-            // Shadow at base
-            this.ctx.globalAlpha = 0.2;
-            this.rect(bx + 1, by + 6, 8, 1, '#000000');
+            // Large data terminal: 10x6 hexagonal node
+            this.rect(bx + 3, by, 4, 1, NC);
+            this.rect(bx + 1, by + 1, 8, 1, ND);
+            this.rect(bx, by + 2, 10, 1, ND);
+            this.rect(bx, by + 3, 10, 1, ND);
+            this.rect(bx + 1, by + 4, 8, 1, ND);
+            this.rect(bx + 3, by + 5, 4, 1, NC);
+            // Left/right edges
+            this.rect(bx, by + 2, 1, 2, NC);
+            this.rect(bx + 9, by + 2, 1, 2, NC);
+            // Pulsing center
+            const g = 0.4 + Math.sin(this.time * 1.8 + bx * 0.07) * 0.35;
+            this.ctx.globalAlpha = g;
+            this.rect(bx + 4, by + 2, 2, 2, NC);
             this.ctx.globalAlpha = 1;
         }
     }
@@ -835,12 +755,12 @@ class TownRenderer {
             viz.position.x = viz.homeX + shake;
         }
 
-        // Shadow (wider for 2x sprites)
-        this.ctx.globalAlpha = 0.2;
-        this.rect(x + 6, y + 28, 20, 3, '#000000');
+        // Shadow glow (cyan-tinted)
+        this.ctx.globalAlpha = 0.15;
+        this.rect(x + 6, y + 28, 20, 3, TRON.CYAN);
         this.ctx.globalAlpha = 1;
 
-        // Choose sprite frame (32x32 upscaled)
+        // Choose sprite frame
         const spriteData = (isWalking && bobFrame) ? agent.walkPixels : agent.frontPixels;
         const alpha = viz.vizState === 'offline' ? 0.3 : 1.0;
 
@@ -850,13 +770,13 @@ class TownRenderer {
             this.sprite(spriteData, x, y + dy, alpha);
         }
 
-        // Carried scroll
+        // Carried data disc
         if (viz.hasScroll) {
             const scrollBob = Math.sin(this.time * 3) * 0.8;
             this.sprite(WORK_ITEM_SPRITE, x + 8, y - 12 + scrollBob);
         }
 
-        // Held tool (idle or working at home)
+        // Held tool
         if (!viz.hasScroll && (viz.vizState === 'idle' || viz.vizState === 'working')) {
             this.drawAgentTool(agentKey, x, y + dy);
         }
@@ -892,7 +812,7 @@ class TownRenderer {
                 const a = this.time * 3;
                 for (let i = 0; i < 3; i++) {
                     const da = a + (i * Math.PI * 2 / 3);
-                    this.px(x + 16 + Math.cos(da) * 8, y - 8 + Math.sin(da) * 3, '#FFDD44');
+                    this.px(x + 16 + Math.cos(da) * 8, y - 8 + Math.sin(da) * 3, TRON.CYAN);
                 }
                 break;
             }
@@ -903,7 +823,7 @@ class TownRenderer {
                 break;
             }
             case 'picking_up': {
-                this.text('!', x + 20, y - 6, '#FFDD44', 12);
+                this.text('!', x + 20, y - 6, TRON.CYAN, 12);
                 break;
             }
             case 'celebrating': {
@@ -928,7 +848,7 @@ class TownRenderer {
         }
 
         if (activeItems.length > 5) {
-            this.text(`+${activeItems.length - 5}`, d.x + d.w + 8, d.y + 18, '#887744', 10);
+            this.text(`+${activeItems.length - 5}`, d.x + d.w + 8, d.y + 18, TRON.TEXT_DIM, 10);
         }
     }
 
@@ -939,13 +859,18 @@ class TownRenderer {
         const working = agents.filter(a => a.apiStatus === 'working').length;
         const idle = agents.filter(a => a.apiStatus === 'idle').length;
 
-        this.ctx.fillStyle = 'rgba(10, 10, 20, 0.6)';
+        // Dark transparent bar
+        this.ctx.fillStyle = 'rgba(0, 5, 16, 0.75)';
         this.ctx.fillRect(0, (SCENE_H - 18) * this.pixel, SCENE_W * this.pixel, 18 * this.pixel);
 
+        // Cyan top border
+        this.ctx.fillStyle = 'rgba(0, 223, 252, 0.25)';
+        this.ctx.fillRect(0, (SCENE_H - 18) * this.pixel, SCENE_W * this.pixel, 1 * this.pixel);
+
         this.text(
-            `${working} WORKING  ${idle} IDLE`,
+            `${working} ACTIVE  ${idle} STANDBY`,
             SCENE_W / 2, SCENE_H - 5,
-            '#888899', 10
+            TRON.TEXT_DIM, 10
         );
     }
 
@@ -981,7 +906,6 @@ class TownRenderer {
     // ─── Fireworks ──────────────────────────────────
 
     updateAndDrawFireworks() {
-        // Update and draw rockets
         for (let i = fireworks.length - 1; i >= 0; i--) {
             const fw = fireworks[i];
             const done = fw.update();
@@ -993,7 +917,6 @@ class TownRenderer {
             this.px(fw.x, fw.y + 1, fw.palette[0]);
         }
 
-        // Update and draw burst particles
         for (let i = fireworkParticles.length - 1; i >= 0; i--) {
             const p = fireworkParticles[i];
             p.x += p.vx;
@@ -1033,8 +956,8 @@ class TownRenderer {
         // Agents sorted by Y for depth
         const sorted = AGENT_ORDER.slice().sort((a, b) => {
             const ay = agentVizStates[a]?.position?.y || 0;
-            const by = agentVizStates[b]?.position?.y || 0;
-            return ay - by;
+            const by2 = agentVizStates[b]?.position?.y || 0;
+            return ay - by2;
         });
         for (const key of sorted) {
             const viz = agentVizStates[key];

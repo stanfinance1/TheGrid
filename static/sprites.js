@@ -1,5 +1,5 @@
 /**
- * Workshop Town - Stardew Valley Style Sprite & Map Data
+ * THE GRID - Tron Legacy Style Sprite & Map Data
  *
  * Top-down 3/4 view. Characters are 16x16 base pixels, upscaled 2x to 32x32.
  * Scene is 480x320 pixel-art pixels, rendered at 2x scale (960x640).
@@ -32,11 +32,11 @@ function upscale2x(pixels) {
 const DISPATCH = { x: 224, y: 144, w: 48, h: 32 };
 
 const BUILDINGS = {
-    ledger:     { x: 40,  y: 24,  w: 44, h: 32, roofColor: '#2D6B2D', wallColor: '#5a4a3a', label: 'LEDGER' },
-    scout:      { x: 218, y: 24,  w: 44, h: 32, roofColor: '#1E4D8C', wallColor: '#5a4a3a', label: 'SCOUT' },
-    scribe:     { x: 396, y: 24,  w: 44, h: 32, roofColor: '#6B2D8B', wallColor: '#5a4a3a', label: 'SCRIBE' },
-    advisor:    { x: 88,  y: 230, w: 44, h: 32, roofColor: '#8B6B0B', wallColor: '#5a4a3a', label: 'ADVISOR' },
-    watchtower: { x: 336, y: 230, w: 44, h: 32, roofColor: '#8B1A1A', wallColor: '#5a4a3a', label: 'WATCH' },
+    ledger:     { x: 40,  y: 24,  w: 44, h: 32, roofColor: '#00FF88', label: 'LEDGER' },
+    scout:      { x: 218, y: 24,  w: 44, h: 32, roofColor: '#4488FF', label: 'SCOUT' },
+    scribe:     { x: 396, y: 24,  w: 44, h: 32, roofColor: '#CC44FF', label: 'SCRIBE' },
+    advisor:    { x: 88,  y: 230, w: 44, h: 32, roofColor: '#FF8800', label: 'ADVISOR' },
+    watchtower: { x: 336, y: 230, w: 44, h: 32, roofColor: '#FF3366', label: 'WATCH' },
 };
 
 // Agent home positions (in front of their building doors)
@@ -87,7 +87,7 @@ const OVERSEER_PATROL = [
     { x: 94,  y: 112 },   // Up to top road
 ];
 
-// Dirt road segments (x1, y1 -> x2, y2, width)
+// Light trail segments (x1, y1 -> x2, y2, width)
 const ROAD_SEGMENTS = [
     // Top row verticals (building doors down to horizontal road)
     { x1: 54, y1: 56, x2: 54, y2: 116, w: 10 },
@@ -112,20 +112,7 @@ const WALK_SPEED = 1.2;  // pixels per frame (doubled from 0.6)
 const OVERSEER_WALK_SPEED = 0.45;  // Overseer strolls slowly
 
 // ═══════════════════════════════════════════════════════
-//  GRASS PALETTE (for background texture)
-// ═══════════════════════════════════════════════════════
-
-const GRASS_COLORS = [
-    '#3a7a2a', '#3e7e2e', '#368026', '#428432',
-    '#367826', '#3c7c2c', '#347424', '#407e30',
-];
-const GRASS_FLOWER_COLORS = ['#dddd44', '#dd88aa', '#aaddff', '#ffaaaa'];
-const DIRT_COLOR = '#8B7355';
-const DIRT_DARK = '#6B5335';
-const DIRT_LIGHT = '#9B8365';
-
-// ═══════════════════════════════════════════════════════
-//  AGENT SPRITES - Top-down 3/4 view (Stardew Valley style)
+//  AGENT SPRITES - Top-down 3/4 view (Tron program style)
 //  Base 16x16, upscaled to 32x32 at decode time
 // ═══════════════════════════════════════════════════════
 
@@ -138,14 +125,14 @@ const AGENTS = {
         name: 'Foreman',
         title: 'The Orchestrator',
         model: 'Sonnet',
-        color: '#D4A017',
+        color: '#FFD700',
         desc: 'Master orchestrator. Receives all questions, decomposes into agent tasks, coordinates parallel execution, synthesizes results.',
         palette: {
-            'h': '#8B6B0B', 'H': '#D4A017', 'L': '#B8960B',
+            'h': '#8B7700', 'H': '#FFD700', 'L': '#D4AA00',
             's': '#F0C8A0',
             'e': '#222244', 'w': '#AACCFF',
-            'g': '#6B4400', 'G': '#C8941E', 'v': '#E8B830',
-            'p': '#2A2A4A', 'b': '#4A3520',
+            'g': '#6B5500', 'G': '#D4A800', 'v': '#FFE030',
+            'p': '#1A1A3A', 'b': '#2A2A4A',
             'm': '#CC6655',
         },
         front: [
@@ -191,14 +178,14 @@ const AGENTS = {
         name: 'Ledger',
         title: 'The Accountant',
         model: 'Haiku',
-        color: '#4A9E4A',
+        color: '#00FF88',
         desc: 'Financial data lookups, metric queries, and daily numbers. Runs on Haiku for fast, cheap answers.',
         palette: {
-            'h': '#5C4033', 'H': '#7A5A43',
+            'h': '#2A4A3A', 'H': '#3A6A4A',
             's': '#F0C8A0',
             'e': '#222244', 'w': '#AACCFF',
-            'g': '#2D6B2D', 'G': '#4A9E4A',
-            'p': '#2A2A4A', 'b': '#4A3520',
+            'g': '#007A44', 'G': '#00FF88',
+            'p': '#1A1A3A', 'b': '#2A2A4A',
             'm': '#CC6655',
         },
         front: [
@@ -244,14 +231,14 @@ const AGENTS = {
         name: 'Scout',
         title: 'The Analyst',
         model: 'Sonnet',
-        color: '#3A7BD5',
+        color: '#4488FF',
         desc: 'Web research, data gathering, and competitive analysis. Fetches live data from APIs and the web.',
         palette: {
-            'a': '#CC6B22', 'A': '#E89040',
+            'a': '#1144AA', 'A': '#2266DD',
             's': '#F0C8A0',
             'e': '#222244', 'w': '#FFFFFF',
-            'c': '#1E4D8C', 'C': '#3A7BD5',
-            'p': '#2A2A4A', 'b': '#4A3520',
+            'c': '#1155CC', 'C': '#4488FF',
+            'p': '#1A1A3A', 'b': '#2A2A4A',
             'm': '#CC6655',
         },
         front: [
@@ -297,15 +284,15 @@ const AGENTS = {
         name: 'Scribe',
         title: 'Report Writer',
         model: 'Sonnet',
-        color: '#9B59B6',
+        color: '#CC44FF',
         desc: 'Writes reports, summaries, and long-form content. Generates charts and formatted deliverables.',
         palette: {
-            'd': '#222233', 'D': '#333355',
+            'd': '#2A1A3A', 'D': '#3A2A5A',
             'h': '#2A2035', 'H': '#3A3045',
             's': '#F0C8A0',
             'e': '#222244', 'w': '#FFFFFF',
-            'v': '#6B2D8B', 'V': '#9B59B6',
-            'b': '#4A3520',
+            'v': '#8800CC', 'V': '#CC44FF',
+            'b': '#2A2A4A',
             'm': '#CC6655',
         },
         front: [
@@ -351,15 +338,15 @@ const AGENTS = {
         name: 'Advisor',
         title: 'The Strategist',
         model: 'Sonnet',
-        color: '#E8A838',
+        color: '#FF8800',
         desc: 'Strategic analysis, recommendations, and action plans. Synthesizes data from other agents into insights.',
         palette: {
             't': '#2A2040', 'T': '#3A3055',
-            'r': '#B8860B', 'R': '#E8A838',
+            'r': '#CC5500', 'R': '#FF8800',
             's': '#F0C8A0',
             'e': '#222244', 'w': '#FFFFFF',
             'f': '#AAAAAA', 'F': '#CCCCCC',
-            'p': '#2A2A4A', 'b': '#4A3520',
+            'p': '#1A1A3A', 'b': '#2A2A4A',
             'm': '#CC6655',
         },
         front: [
@@ -405,15 +392,15 @@ const AGENTS = {
         name: 'Watchtower',
         title: 'Ops Monitor',
         model: 'Haiku',
-        color: '#E05555',
+        color: '#FF3366',
         desc: 'Monitoring, alerts, and status checks. Watches systems and flags anomalies. Runs on Haiku for speed.',
         palette: {
             'k': '#555566', 'K': '#888899',
             's': '#F0C8A0',
             'e': '#222244', 'w': '#FFFFFF',
-            'a': '#8B1A1A', 'A': '#E05555',
-            'y': '#FFD700',
-            'p': '#2A2A4A', 'b': '#4A3520',
+            'a': '#CC0033', 'A': '#FF3366',
+            'y': '#FF6100',
+            'p': '#1A1A3A', 'b': '#2A2A4A',
             'm': '#CC6655',
         },
         front: [
@@ -459,17 +446,17 @@ const AGENTS = {
         name: 'Overseer',
         title: 'The Consultant',
         model: 'Sonnet',
-        color: '#444444',
+        color: '#00DFFC',
         desc: 'Self-improvement engine. Watches other agents, updates prompts, creates tools, retries failed tasks. Always patrolling.',
         palette: {
-            'h': '#1A1A1A', 'H': '#2A2A2A',   // black hair
-            's': '#F0C8A0',                      // skin
-            'e': '#222244', 'w': '#AACCFF',      // eyes
-            'o': '#FFD700',                      // monocle gold
-            't': '#111111', 'T': '#222222',     // black coat
-            'L': '#333333',                      // coat highlight
-            'p': '#0A0A0A', 'b': '#1A1A1A',     // black pants, black boots
-            'm': '#CC6655',                      // mouth
+            'h': '#1A1A2A', 'H': '#2A2A3A',     // dark blue-black hair
+            's': '#F0C8A0',                        // skin
+            'e': '#222244', 'w': '#00DFFC',        // eyes glow cyan
+            'o': '#00DFFC',                        // monocle cyan
+            't': '#0A0A1A', 'T': '#111122',       // dark blue-black coat
+            'L': '#00DFFC',                        // coat highlights = cyan circuit lines
+            'p': '#0A0A1A', 'b': '#111122',       // dark boots
+            'm': '#CC6655',                        // mouth
         },
         front: [
             '................',
@@ -520,16 +507,17 @@ for (const [key, agent] of Object.entries(AGENTS)) {
 //  UTILITY SPRITES (decoded then upscaled)
 // ═══════════════════════════════════════════════════════
 
+// Data disc (Tron identity disc)
 const WORK_ITEM_SPRITE = upscale2x(decodeSprite([
-    '..kkkk..',
-    '.kPPPPk.',
-    'kPPiiPPk',
-    'kPPiiPPk',
-    'kPPiiPPk',
-    'kPPPPPPk',
-    '.kppppk.',
-    '..kkkk..',
-], { 'p': '#F5DEB3', 'P': '#FFEEDD', 'k': '#8B7355', 'i': '#555555' }));
+    '..cccc..',
+    '.cCCCCc.',
+    'cCCiiCCc',
+    'cCCiiCCc',
+    'cCCiiCCc',
+    'cCCCCCCc',
+    '.cccccc.',
+    '..cccc..',
+], { 'c': '#004A5A', 'C': '#00DFFC', 'i': '#001A2A' }));
 
 const ALERT_SPRITE = upscale2x(decodeSprite([
     '.rrr.',
@@ -539,7 +527,7 @@ const ALERT_SPRITE = upscale2x(decodeSprite([
     '.....',
     '..r..',
     '..r..',
-], { 'r': '#FF4444' }));
+], { 'r': '#FF3366' }));
 
 const CHECK_SPRITE = upscale2x(decodeSprite([
     '....g',
@@ -547,56 +535,63 @@ const CHECK_SPRITE = upscale2x(decodeSprite([
     'g.gg.',
     'ggg..',
     'gg...',
-], { 'g': '#44FF88' }));
+], { 'g': '#00FF88' }));
 
 // ═══════════════════════════════════════════════════════
 //  AGENT TOOLS (held items, role-relevant, upscaled)
 // ═══════════════════════════════════════════════════════
 
 const AGENT_TOOLS = {
+    // Foreman: data clipboard (neon gold)
     foreman: upscale2x(decodeSprite([
         '.CC.',
         'CPPC',
         'CiiC',
         'CiiC',
         'CPPC',
-    ], { 'C': '#8B6B0B', 'P': '#FFEEDD', 'i': '#555555' })),
+    ], { 'C': '#FFD700', 'P': '#1A1500', 'i': '#332A00' })),
 
+    // Ledger: data grid (neon green)
     ledger: upscale2x(decodeSprite([
         'GGG',
         'GwG',
         'GGG',
         'GwG',
         'GGG',
-    ], { 'G': '#2D6B2D', 'w': '#CCDDCC' })),
+    ], { 'G': '#00FF88', 'w': '#003322' })),
 
+    // Scout: scanner (neon blue)
     scout: upscale2x(decodeSprite([
         'cc..',
         'cCCc',
         '.ccc',
-    ], { 'c': '#1E4D8C', 'C': '#6699CC' })),
+    ], { 'c': '#1155CC', 'C': '#4488FF' })),
 
+    // Scribe: light pen (neon purple)
     scribe: upscale2x(decodeSprite([
         '..w',
         '.Vw',
         '.V.',
         'V..',
-    ], { 'V': '#9B59B6', 'w': '#FFFFFF' })),
+    ], { 'V': '#CC44FF', 'w': '#EE99FF' })),
 
+    // Advisor: data cube (neon orange)
     advisor: upscale2x(decodeSprite([
         '.RR.',
         'RGGR',
         'RGGR',
         '.RR.',
-    ], { 'R': '#E8A838', 'G': '#FFEE88' })),
+    ], { 'R': '#FF8800', 'G': '#331A00' })),
 
+    // Watchtower: alert beacon (neon pink)
     watchtower: upscale2x(decodeSprite([
         '.k.',
         'kYk',
         'kYk',
         '.k.',
-    ], { 'k': '#8B1A1A', 'Y': '#FFD700' })),
+    ], { 'k': '#CC0033', 'Y': '#FF3366' })),
 
+    // Overseer: identity disc (cyan - Tron signature)
     overseer: upscale2x(decodeSprite([
         '.TT.',
         'TCCT',
@@ -604,11 +599,11 @@ const AGENT_TOOLS = {
         '.TT.',
         '..T.',
         '...T',
-    ], { 'T': '#333333', 'C': '#666666' })),
+    ], { 'T': '#004A5A', 'C': '#00DFFC' })),
 };
 
 // ═══════════════════════════════════════════════════════
-//  BUSH DECORATIONS
+//  DATA NODE POSITIONS
 // ═══════════════════════════════════════════════════════
 
 const BUSH_POSITIONS = [
