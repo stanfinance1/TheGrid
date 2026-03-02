@@ -72,6 +72,26 @@ body {
     gap: 16px;
 }
 
+.music-btn {
+    background: none;
+    border: 1px solid #1a3a4a;
+    border-radius: 3px;
+    color: #00DFFC;
+    cursor: pointer;
+    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+.music-btn:hover {
+    border-color: #00DFFC;
+    box-shadow: 0 0 8px rgba(0,223,252,0.3);
+}
+.music-btn.muted {
+    color: #3a4a5a;
+    border-color: #1a2a3a;
+}
+
 #time-bar {
     display: flex;
     gap: 12px;

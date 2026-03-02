@@ -31,6 +31,15 @@
                     <span class="time-zone"><span class="tz-label tz-ca">CA</span> <span id="tz-ca">--:--:--</span></span>
                 </div>
                 <span id="header-stats"></span>
+                <button id="music-toggle" class="music-btn" title="Toggle music">
+                    <svg id="music-icon-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                    </svg>
+                    <svg id="music-icon-off" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                        <line x1="1" y1="1" x2="23" y2="23" stroke-width="2.5"/>
+                    </svg>
+                </button>
                 <span id="conn-status" class="conn-connecting">CONNECTING</span>
             </div>
         </header>

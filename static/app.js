@@ -7,6 +7,271 @@
 
 const POLL_INTERVAL = 3000;
 const HEALTH_INTERVAL = 5000;
+
+// ═══════════════════════════════════════════════════════
+//  GENERATIVE SYNTH — Tron Legacy ambient drone
+// ═══════════════════════════════════════════════════════
+
+const SYNTH_VOLUME = 0.30;
+let _synthCtx = null;
+let _synthGain = null;
+let _synthMuted = false;
+let _synthRunning = false;
+
+function initMusic() {
+    const btn = document.getElementById('music-toggle');
+    const iconOn = document.getElementById('music-icon-on');
+    const iconOff = document.getElementById('music-icon-off');
+    if (!btn) return;
+
+    // Restore mute preference
+    _synthMuted = sessionStorage.getItem('grid_music_muted') === '1';
+    if (_synthMuted) {
+        btn.classList.add('muted');
+        iconOn.style.display = 'none';
+        iconOff.style.display = '';
+    }
+
+    btn.addEventListener('click', () => {
+        _synthMuted = !_synthMuted;
+        btn.classList.toggle('muted', _synthMuted);
+        iconOn.style.display = _synthMuted ? 'none' : '';
+        iconOff.style.display = _synthMuted ? '' : 'none';
+        sessionStorage.setItem('grid_music_muted', _synthMuted ? '1' : '0');
+        if (_synthGain) {
+            _synthGain.gain.setTargetAtTime(_synthMuted ? 0 : SYNTH_VOLUME, _synthCtx.currentTime, 0.3);
+        }
+    });
+}
+
+function startMusic() {
+    if (_synthRunning) return;
+    _synthRunning = true;
+
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        _synthCtx = ctx;
+
+        // Master gain (fade in over 4s)
+        const master = ctx.createGain();
+        master.gain.value = 0;
+        master.gain.setTargetAtTime(_synthMuted ? 0 : SYNTH_VOLUME, ctx.currentTime + 0.1, 1.5);
+        master.connect(ctx.destination);
+        _synthGain = master;
+
+        // ── Dark pad: layered detuned saws through a low-pass filter ──
+        // Key of D minor — moody Tron feel
+        const padFreqs = [
+            73.42,   // D2
+            110.0,   // A2
+            146.83,  // D3
+            174.61,  // F3
+            220.0,   // A3
+        ];
+        const padGain = ctx.createGain();
+        padGain.gain.value = 0.35;
+
+        const padFilter = ctx.createBiquadFilter();
+        padFilter.type = 'lowpass';
+        padFilter.frequency.value = 400;
+        padFilter.Q.value = 1.5;
+
+        // Slow filter sweep LFO
+        const filterLFO = ctx.createOscillator();
+        const filterLFOGain = ctx.createGain();
+        filterLFO.type = 'sine';
+        filterLFO.frequency.value = 0.04; // very slow sweep
+        filterLFOGain.gain.value = 200;
+        filterLFO.connect(filterLFOGain);
+        filterLFOGain.connect(padFilter.frequency);
+        filterLFO.start();
+
+        padFreqs.forEach(freq => {
+            // Two detuned oscillators per voice for thickness
+            for (const detune of [-6, 6]) {
+                const osc = ctx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.value = freq;
+                osc.detune.value = detune;
+                osc.connect(padFilter);
+                osc.start();
+            }
+        });
+        padFilter.connect(padGain);
+        padGain.connect(master);
+
+        // ── Sub bass pulse ──
+        const subOsc = ctx.createOscillator();
+        subOsc.type = 'sine';
+        subOsc.frequency.value = 36.71; // D1
+        const subGain = ctx.createGain();
+        subGain.gain.value = 0.3;
+
+        // Slow amplitude LFO for breathing effect
+        const subLFO = ctx.createOscillator();
+        const subLFOGain = ctx.createGain();
+        subLFO.type = 'sine';
+        subLFO.frequency.value = 0.08;
+        subLFOGain.gain.value = 0.12;
+        subLFO.connect(subLFOGain);
+        subLFOGain.connect(subGain.gain);
+        subLFO.start();
+
+        subOsc.connect(subGain);
+        subGain.connect(master);
+        subOsc.start();
+
+        // ── High shimmer: filtered noise ──
+        const bufferSize = ctx.sampleRate * 2;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        noise.loop = true;
+
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = 3000;
+        noiseFilter.Q.value = 2.0;
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.value = 0.02;
+
+        // Shimmer sweep
+        const noiseLFO = ctx.createOscillator();
+        const noiseLFOGain = ctx.createGain();
+        noiseLFO.type = 'sine';
+        noiseLFO.frequency.value = 0.02;
+        noiseLFOGain.gain.value = 1500;
+        noiseLFO.connect(noiseLFOGain);
+        noiseLFOGain.connect(noiseFilter.frequency);
+        noiseLFO.start();
+
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(master);
+        noise.start();
+
+        // ── Delay feedback for spaciousness ──
+        const delay = ctx.createDelay(1.0);
+        delay.delayTime.value = 0.6;
+        const feedback = ctx.createGain();
+        feedback.gain.value = 0.3;
+        const delayFilter = ctx.createBiquadFilter();
+        delayFilter.type = 'lowpass';
+        delayFilter.frequency.value = 1200;
+
+        padGain.connect(delay);
+        delay.connect(delayFilter);
+        delayFilter.connect(feedback);
+        feedback.connect(delay);
+        delayFilter.connect(master);
+
+        // ── Derezzed-style rhythmic sequencer (140 BPM) ──
+        const BPM = 140;
+        const STEP = 60 / BPM / 4; // 16th note ~0.107s
+        const arpBase = 146.83;     // D3
+
+        function semi(offset) {
+            return arpBase * Math.pow(2, offset / 12);
+        }
+
+        // D minor pattern — relentless root hammering with octave + fifth stabs
+        const SEQ = [
+            0, 0, 12, 0,   7, 0, 12, 7,     // D D D' D | A D D' A
+            0, 0, 12, 0,   7, 12, 0, 7,      // D D D' D | A D' D A
+            0, 0, 12, 0,   3, 0, 7, 3,       // D D D' D | F D A F
+            0, 3, 7, 12,   7, 3, 0, -5,      // D F A D' | A F D A2
+        ];
+        const KICK_HITS = new Set([0, 8, 16, 24]); // every 4 beats
+
+        // Waveshaper distortion (heavy clip)
+        const dist = ctx.createWaveShaper();
+        const curve = new Float32Array(44100);
+        for (let i = 0; i < 44100; i++) {
+            const x = (i * 2) / 44100 - 1;
+            curve[i] = (Math.PI + 30) * x / (Math.PI + 30 * Math.abs(x));
+        }
+        dist.curve = curve;
+        dist.oversample = '4x';
+
+        // Arp: square osc -> distortion -> bandpass -> envelope -> level -> master
+        const arpOsc = ctx.createOscillator();
+        arpOsc.type = 'square';
+        arpOsc.frequency.value = arpBase;
+
+        const arpBP = ctx.createBiquadFilter();
+        arpBP.type = 'bandpass';
+        arpBP.frequency.value = 900;
+        arpBP.Q.value = 3;
+
+        const arpEnv = ctx.createGain();
+        arpEnv.gain.value = 0;
+        const arpLvl = ctx.createGain();
+        arpLvl.gain.value = 0.14;
+
+        arpOsc.connect(dist);
+        dist.connect(arpBP);
+        arpBP.connect(arpEnv);
+        arpEnv.connect(arpLvl);
+        arpLvl.connect(master);
+        // Also feed arp into delay for echo tail
+        arpLvl.connect(delay);
+        arpOsc.start();
+
+        // Kick: sine sweep 150->40 Hz, short thump
+        const kickOsc = ctx.createOscillator();
+        kickOsc.type = 'sine';
+        kickOsc.frequency.value = 40;
+        const kickEnv = ctx.createGain();
+        kickEnv.gain.value = 0;
+        const kickLvl = ctx.createGain();
+        kickLvl.gain.value = 0.22;
+        kickOsc.connect(kickEnv);
+        kickEnv.connect(kickLvl);
+        kickLvl.connect(master);
+        kickOsc.start();
+
+        // Lookahead scheduler
+        let _step = 0;
+        let _nextT = ctx.currentTime + 5; // arp enters 5s after pad
+
+        function scheduleNote(t, idx) {
+            const s = idx % SEQ.length;
+
+            // Arp note — short gated envelope
+            arpOsc.frequency.setValueAtTime(semi(SEQ[s]), t);
+            arpEnv.gain.setValueAtTime(0.9, t);
+            arpEnv.gain.exponentialRampToValueAtTime(0.001, t + STEP * 0.65);
+
+            // Kick on downbeats + sidechain duck
+            if (KICK_HITS.has(s)) {
+                kickOsc.frequency.setValueAtTime(150, t);
+                kickOsc.frequency.exponentialRampToValueAtTime(40, t + 0.07);
+                kickEnv.gain.setValueAtTime(0.8, t);
+                kickEnv.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+                // Sidechain: duck pad on kick
+                padGain.gain.setValueAtTime(0.08, t);
+                padGain.gain.linearRampToValueAtTime(0.35, t + STEP * 3);
+            }
+        }
+
+        setInterval(() => {
+            while (_nextT < ctx.currentTime + 0.1) {
+                scheduleNote(_nextT, _step);
+                _step++;
+                _nextT += STEP;
+            }
+        }, 25);
+
+    } catch (e) {
+        console.warn('Synth init failed:', e);
+        _synthRunning = false;
+    }
+}
 const ACQ_POLL_INTERVAL = 30000;   // acquisition data: every 30s
 const CRON_POLL_INTERVAL = 60000;  // cron status: every 60s
 const HEALTH_ERROR_THRESHOLD = 5;
@@ -1154,6 +1419,7 @@ async function runLoginSequence() {
 function initGrid() {
     const canvas = document.getElementById('town-canvas');
     renderer = new TownRenderer(canvas);
+    initMusic();
 
     // Responsive resize
     const canvasWrap = document.getElementById('canvas-wrap');
@@ -1267,10 +1533,14 @@ window.addEventListener('DOMContentLoaded', async () => {
         appEl.style.display = '';
         appEl.classList.add('fullscreen-grid');
         initGrid();
+        // Music needs a user gesture — start on first click anywhere
+        const startOnce = () => { startMusic(); document.removeEventListener('click', startOnce); };
+        document.addEventListener('click', startOnce);
         return;
     }
 
     // Run the full login sequence
     await runLoginSequence();
     initGrid();
+    startMusic();
 });
