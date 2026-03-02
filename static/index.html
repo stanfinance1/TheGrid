@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Town</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>&#x1f3ed;</text></svg>">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header id="header">
+            <h1>WORKSHOP TOWN</h1>
+            <div id="header-right">
+                <div id="time-bar">
+                    <span class="time-zone"><span class="tz-label tz-nyc">NYC</span> <span id="tz-nyc">--:--:--</span></span>
+                    <span class="time-zone"><span class="tz-label tz-ca">CA</span> <span id="tz-ca">--:--:--</span></span>
+                </div>
+                <span id="header-stats"></span>
+                <span id="conn-status" class="conn-connecting">CONNECTING</span>
+            </div>
+        </header>
+
+        <!-- Control Center - Left Sidebar -->
+        <div id="control-center">
+            <h2>CONTROL CENTER</h2>
+            <div id="agent-status-list"></div>
+            <div id="cc-footer">
+                <div id="cc-footer-text">-- / 6 ONLINE</div>
+            </div>
+            <div id="scoreboard">
+                <h2>SCOREBOARD</h2>
+                <div id="scoreboard-stats">
+                    <div class="work-empty">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main canvas area -->
+        <div id="main">
+            <div id="canvas-wrap">
+                <canvas id="town-canvas"></canvas>
+            </div>
+            <div id="work-panel">
+                <h2>WORK QUEUE</h2>
+                <div id="work-list">
+                    <div class="work-empty">Connecting...</div>
+                </div>
+            </div>
+            <div id="todo-panel">
+                <div id="todo-header">
+                    <h2>MY TASKS</h2>
+                </div>
+                <div id="todo-add">
+                    <input type="text" id="todo-input" placeholder="ADD TASK..." maxlength="80">
+                    <div id="todo-urgency-btns">
+                        <button class="urgency-btn urgency-low active" data-urgency="low">LO</button>
+                        <button class="urgency-btn urgency-med" data-urgency="med">MED</button>
+                        <button class="urgency-btn urgency-high" data-urgency="high">HI</button>
+                    </div>
+                    <button id="todo-btn-add">+ADD</button>
+                </div>
+                <div id="todo-list"></div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Event Log + Acquisition + Recurring Tasks -->
+        <div id="sidebar">
+            <!-- Event Log (top) -->
+            <div id="event-log-section">
+                <div id="sidebar-header">
+                    <h2>EVENT LOG</h2>
+                    <button id="btn-clear-log" title="Clear log">CLR</button>
+                </div>
+                <div id="event-list"></div>
+            </div>
+
+            <!-- Acquisition Dashboard (middle) -->
+            <div id="acquisition-section">
+                <div class="sidebar-section-header">
+                    <h2>ACQUISITION</h2>
+                    <span id="acq-status" class="acq-status-dot"></span>
+                </div>
+                <div id="acquisition-data">
+                    <div class="work-empty">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Recurring Tasks -->
+            <div id="cron-section">
+                <div class="sidebar-section-header">
+                    <h2>RECURRING TASKS</h2>
+                </div>
+                <div id="cron-list">
+                    <div class="work-empty">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Overseer Audit Log (bottom) -->
+            <div id="overseer-log-section">
+                <div class="sidebar-section-header">
+                    <h2>OVERSEER LOG</h2>
+                    <span id="overseer-log-count" class="log-count-badge">0</span>
+                </div>
+                <div id="overseer-log-list">
+                    <div class="work-empty">No changes yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts (order matters: sprites -> renderer -> app) -->
+    <script src="/static/sprites.js"></script>
+    <script src="/static/renderer.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
