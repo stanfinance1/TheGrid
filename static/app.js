@@ -39,6 +39,7 @@ function initMusic() {
         iconOff.style.display = _synthMuted ? '' : 'none';
         sessionStorage.setItem('grid_music_muted', _synthMuted ? '1' : '0');
         if (_synthGain) {
+            if (_synthCtx && _synthCtx.state === 'suspended') _synthCtx.resume();
             _synthGain.gain.setTargetAtTime(_synthMuted ? 0 : SYNTH_VOLUME, _synthCtx.currentTime, 0.3);
         }
     });
@@ -50,6 +51,7 @@ function startMusic() {
 
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
         _synthCtx = ctx;
 
         // Master gain (fade in over 4s)
