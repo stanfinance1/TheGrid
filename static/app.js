@@ -137,10 +137,10 @@ function startMusic() {
         const noiseFilter = ctx.createBiquadFilter();
         noiseFilter.type = 'bandpass';
         noiseFilter.frequency.value = 3000;
-        noiseFilter.Q.value = 2.0;
+        noiseFilter.Q.value = 5.0;   // tighter band = less hiss
 
         const noiseGain = ctx.createGain();
-        noiseGain.gain.value = 0.02;
+        noiseGain.gain.value = 0.008; // subtle shimmer, not static
 
         // Shimmer sweep
         const noiseLFO = ctx.createOscillator();
@@ -190,17 +190,23 @@ function startMusic() {
         ];
         const KICK_HITS = new Set([0, 8, 16, 24]); // every 4 beats
 
-        // Waveshaper distortion (heavy clip)
+        // Waveshaper distortion (moderate clip — less harsh)
         const dist = ctx.createWaveShaper();
         const curve = new Float32Array(44100);
         for (let i = 0; i < 44100; i++) {
             const x = (i * 2) / 44100 - 1;
-            curve[i] = (Math.PI + 30) * x / (Math.PI + 30 * Math.abs(x));
+            curve[i] = (Math.PI + 12) * x / (Math.PI + 12 * Math.abs(x));
         }
         dist.curve = curve;
         dist.oversample = '4x';
 
-        // Arp: square osc -> distortion -> bandpass -> envelope -> level -> master
+        // Lowpass after distortion to tame high-frequency hash
+        const arpLP = ctx.createBiquadFilter();
+        arpLP.type = 'lowpass';
+        arpLP.frequency.value = 2400;
+        arpLP.Q.value = 0.7;
+
+        // Arp: square osc -> distortion -> lowpass -> bandpass -> envelope -> level -> master
         const arpOsc = ctx.createOscillator();
         arpOsc.type = 'square';
         arpOsc.frequency.value = arpBase;
@@ -208,7 +214,7 @@ function startMusic() {
         const arpBP = ctx.createBiquadFilter();
         arpBP.type = 'bandpass';
         arpBP.frequency.value = 900;
-        arpBP.Q.value = 3;
+        arpBP.Q.value = 5;   // tighter resonance, less grit
 
         const arpEnv = ctx.createGain();
         arpEnv.gain.value = 0;
@@ -216,7 +222,8 @@ function startMusic() {
         arpLvl.gain.value = 0.14;
 
         arpOsc.connect(dist);
-        dist.connect(arpBP);
+        dist.connect(arpLP);
+        arpLP.connect(arpBP);
         arpBP.connect(arpEnv);
         arpEnv.connect(arpLvl);
         arpLvl.connect(master);
